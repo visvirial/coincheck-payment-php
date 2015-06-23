@@ -1,11 +1,11 @@
 <?php
-namespace CoincheckPayment;
+namespace Coincheck;
 
 use Guzzle\Common\Event as GuzzleEvent;
 use Guzzle\Service\Client as GuzzleClient;
 use Guzzle\Service\Description\ServiceDescription;
 
-class Coincheck
+class CoincheckPayment
 {
     /** @var GuzzleClient */
     private $client;
@@ -30,18 +30,8 @@ class Coincheck
         $this->client->setDefaultOption('headers/Content-Type', "application/json");
         $this->client->setDefaultOption('headers/ACCESS-KEY', $this->accessKey);
 
-        /** Public API */
-        $this->ticker = new Ticker($this);
-        $this->trade = new Trade($this);
-        $this->orderBook = new OrderBook($this);
-
         /** Private API */
-        $this->order = new Order($this);
-        $this->send = new Send($this);
-        $this->deposit = new Deposit($this);
-        $this->lend = new Lend($this);
-        $this->borrow = new Borrow($this);
-        $this->account = new Account($this);
+        $this->button = new Button($this);
     }
 
     public function __get($key)
@@ -78,19 +68,10 @@ class Coincheck
      */
     public function request($method, $path, $paramData)
     {
-        if($method == 'get' && count($paramData) > 0) {
-            $path = $path . '?';
-            foreach ($paramData as $k => $v) {
-                $path .= $k.'='.$v;
-            }
-            $paramData=array();
-        }
         $this->setSignature($path, $paramData);
         $req = $this->client->createRequest($method, $path, array());
         if($method == 'post' || $method == 'delete') {
-            foreach ($paramData as $k => $v) {
-                $req->setPostField($k, $v);
-            }
+            $req->setBody(json_encode($paramData),'application/json');
         }
         try {
             $res = $req->send();

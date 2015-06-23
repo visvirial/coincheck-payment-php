@@ -1,5 +1,5 @@
 <?php
-namespace CoincheckPayment;
+namespace Coincheck;
 
 class Button
 {
@@ -20,11 +20,13 @@ class Button
     public function set($params = array())
     {
         $arr = array(
-            'name' => $params['name'],
-            'currency' => $params['currency'],
-            'amount' => $params['amount'],
-            'callback_url' => $params['callback_url'],
-            'max_time' => $params['max_time']
+            'button' => array(
+                'name' => $params['name'],
+                'currency' => $params['currency'],
+                'amount' => $params['amount'],
+                'callback_url' => $params['callback_url'],
+                'max_times' => $params['max_times']
+            )
         );
         $rawResponse = $this->client->request('post', 'buttons', $arr);
         return $rawResponse;
