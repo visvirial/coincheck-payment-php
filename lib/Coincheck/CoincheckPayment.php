@@ -49,11 +49,11 @@ class CoincheckPayment
         throw new \Exception($key . ' is not able to override');
     }
 
-    public function setSignature($path, $arr = array())
+    public function setSignature($path, $body)
     {
         $nonce = time();
         $url = $this->apiBase.$path;
-        $message = $nonce.$url.http_build_query($arr);
+        $message = $nonce.$url.$body;
         $signature = hash_hmac("sha256", $message, $this->secretKey);
         $this->client->setDefaultOption('headers/ACCESS-NONCE', $nonce);
         $this->client->setDefaultOption('headers/ACCESS-SIGNATURE', $signature);
@@ -68,7 +68,7 @@ class CoincheckPayment
      */
     public function request($method, $path, $paramData)
     {
-        $this->setSignature($path, $paramData);
+        $this->setSignature($path, json_encode($paramData));
         $req = $this->client->createRequest($method, $path, array());
         if($method == 'post' || $method == 'delete') {
             $req->setBody(json_encode($paramData),'application/json');
